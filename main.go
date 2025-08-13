@@ -1,8 +1,9 @@
 package main
 
 import (
+	"codingiam/gator/internal/commands"
 	"codingiam/gator/internal/config"
-	"fmt"
+	"codingiam/gator/internal/state"
 	"log"
 )
 
@@ -11,16 +12,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("error reading config: %v", err)
 	}
-	fmt.Printf("Read config: %+v\n", cfg)
 
-	err = cfg.SetUser("doru")
-	if err != nil {
-		log.Fatalf("couldn't set current user: %v", err)
-	}
+	programState := state.New(&cfg)
 
-	cfg, err = config.Read()
+	cmds := commands.New()
+
+	err = cmds.Execute(&programState)
 	if err != nil {
-		log.Fatalf("error reading config: %v", err)
+		log.Fatal(err)
 	}
-	fmt.Printf("Read config again: %+v\n", cfg)
 }
