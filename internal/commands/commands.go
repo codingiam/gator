@@ -13,7 +13,8 @@ type Commands struct {
 func New() Commands {
 	return Commands{
 		registeredCommands: map[string]func(*state.State, command) error{
-			"login": handlerLogin,
+			"login":    handlerLogin,
+			"register": handlerRegister,
 		},
 	}
 }
