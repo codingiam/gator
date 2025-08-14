@@ -15,6 +15,7 @@ func New() Commands {
 		registeredCommands: map[string]func(*state.State, command) error{
 			"login":    handlerLogin,
 			"register": handlerRegister,
+			"reset":    handlerReset,
 		},
 	}
 }
