@@ -19,6 +19,7 @@ func New() Commands {
 			"users":    handlerUsers,
 			"agg":      handlerAgg,
 			"addfeed":  handlerAddfeed,
+			"feeds":    handlerFeeds,
 		},
 	}
 }
