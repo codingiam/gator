@@ -17,6 +17,7 @@ func New() Commands {
 			"register": handlerRegister,
 			"reset":    handlerReset,
 			"users":    handlerUsers,
+			"agg":      handlerAgg,
 		},
 	}
 }
