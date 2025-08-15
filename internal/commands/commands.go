@@ -18,6 +18,7 @@ func New() Commands {
 			"reset":    handlerReset,
 			"users":    handlerUsers,
 			"agg":      handlerAgg,
+			"addfeed":  handlerAddfeed,
 		},
 	}
 }
