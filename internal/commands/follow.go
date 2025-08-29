@@ -11,28 +11,20 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAddfeed(st *state.State, cmd command) error {
-	if len(cmd.Args) != 2 {
-		return errors.New("addfeed requires name and url")
+func handlerFollow(st *state.State, cmd command) error {
+	if len(cmd.Args) != 1 {
+		return errors.New("follow requires url")
 	}
 
-	username := st.Cfg.CurrentUserName
-	name := cmd.Args[0]
-	url := cmd.Args[1]
+	url := cmd.Args[0]
 
-	user, err := st.Db.GetUser(context.Background(), username)
+	feed, err := st.Db.FeedByUrl(context.Background(), url)
 	if err != nil {
 		return err
 	}
 
-	feed, err := st.Db.CreateFeed(context.Background(), database.CreateFeedParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Name:      name,
-		Url:       url,
-		UserID:    user.ID,
-	})
+	name := st.Cfg.CurrentUserName
+	user, err := st.Db.GetUser(context.Background(), name)
 	if err != nil {
 		return err
 	}

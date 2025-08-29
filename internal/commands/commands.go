@@ -13,13 +13,15 @@ type Commands struct {
 func New() Commands {
 	return Commands{
 		registeredCommands: map[string]func(*state.State, command) error{
-			"login":    handlerLogin,
-			"register": handlerRegister,
-			"reset":    handlerReset,
-			"users":    handlerUsers,
-			"agg":      handlerAgg,
-			"addfeed":  handlerAddfeed,
-			"feeds":    handlerFeeds,
+			"login":     handlerLogin,
+			"register":  handlerRegister,
+			"reset":     handlerReset,
+			"users":     handlerUsers,
+			"agg":       handlerAgg,
+			"addfeed":   handlerAddfeed,
+			"feeds":     handlerFeeds,
+			"follow":    handlerFollow,
+			"following": handlerFollowing,
 		},
 	}
 }
