@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerFollow(st *state.State, cmd command) error {
+func handlerFollow(st *state.State, cmd command, user database.User) error {
 	if len(cmd.Args) != 1 {
 		return errors.New("follow requires url")
 	}
@@ -19,12 +19,6 @@ func handlerFollow(st *state.State, cmd command) error {
 	url := cmd.Args[0]
 
 	feed, err := st.Db.FeedByUrl(context.Background(), url)
-	if err != nil {
-		return err
-	}
-
-	name := st.Cfg.CurrentUserName
-	user, err := st.Db.GetUser(context.Background(), name)
 	if err != nil {
 		return err
 	}

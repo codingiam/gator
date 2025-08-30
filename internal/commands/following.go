@@ -1,14 +1,14 @@
 package commands
 
 import (
+	"codingiam/gator/internal/database"
 	"codingiam/gator/internal/state"
 	"context"
 	"fmt"
 )
 
-func handlerFollowing(st *state.State, cmd command) error {
-	name := st.Cfg.CurrentUserName
-	follows, err := st.Db.FeedFollowsForUser(context.Background(), name)
+func handlerFollowing(st *state.State, cmd command, user database.User) error {
+	follows, err := st.Db.FeedFollowsForUser(context.Background(), user.Name)
 	if err != nil {
 		return err
 	}

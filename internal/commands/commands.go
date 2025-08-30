@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"codingiam/gator/internal/database"
 	"codingiam/gator/internal/state"
+	"context"
 	"errors"
 	"os"
 )
@@ -18,10 +20,10 @@ func New() Commands {
 			"reset":     handlerReset,
 			"users":     handlerUsers,
 			"agg":       handlerAgg,
-			"addfeed":   handlerAddfeed,
+			"addfeed":   middlewareLoggedIn(handlerAddfeed),
 			"feeds":     handlerFeeds,
-			"follow":    handlerFollow,
-			"following": handlerFollowing,
+			"follow":    middlewareLoggedIn(handlerFollow),
+			"following": middlewareLoggedIn(handlerFollowing),
 		},
 	}
 }
@@ -45,4 +47,15 @@ func (c Commands) run(s *state.State, cmd command) error {
 		return errors.New("command not found")
 	}
 	return f(s, cmd)
+}
+
+func middlewareLoggedIn(handler func(s *state.State, cmd command, user database.User) error) func(*state.State, command) error {
+	return func(s *state.State, cmd command) error {
+		user, err := s.Db.GetUser(context.Background(), s.Cfg.CurrentUserName)
+		if err != nil {
+			return err
+		}
+
+		return handler(s, cmd, user)
+	}
 }
