@@ -4,7 +4,7 @@ import (
 	"codingiam/gator/internal/feed"
 	"codingiam/gator/internal/state"
 	"errors"
-	"fmt"
+	"log"
 	"time"
 )
 
@@ -18,13 +18,14 @@ func handlerAgg(st *state.State, cmd command) error {
 		return err
 	}
 
+	log.Printf("Collecting feeds every %s...", timeBetweenRequests)
+
 	ticker := time.NewTicker(timeBetweenRequests)
 	for ; ; <-ticker.C {
-		ffeed, err := feed.ScrapeFeeds(st)
+		_, err := feed.ScrapeFeeds(st)
 		if err != nil {
 			return err
 		}
-		fmt.Println(ffeed)
 	}
 
 	return nil

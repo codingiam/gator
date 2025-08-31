@@ -9,8 +9,12 @@ import (
 	"fmt"
 	"html"
 	"io"
+	"log"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type RSSFeed struct {
@@ -68,22 +72,57 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 }
 
 func ScrapeFeeds(st *state.State) (*RSSFeed, error) {
-	ctx := context.Background()
-
-	ffeed, err := st.Db.GetNextFeedToFetch(ctx)
+	ffeed, err := st.Db.GetNextFeedToFetch(context.Background())
 	if err != nil {
 		return nil, err
 	}
+
+	return ScrapeFeed(st.Db, ffeed)
+}
+
+func ScrapeFeed(db *database.Queries, ffeed database.Feed) (*RSSFeed, error) {
+	ctx := context.Background()
 
 	rss, err := FetchFeed(ctx, ffeed.Url)
 	if err != nil {
 		return nil, err
 	}
 
-	err = st.Db.MarkFeedFetched(ctx,
+	err = db.MarkFeedFetched(ctx,
 		database.MarkFeedFetchedParams{ID: ffeed.ID, LastFetchedAt: sql.NullTime{Time: time.Now(), Valid: true}})
 	if err != nil {
 		return rss, err
+	}
+
+	for _, item := range rss.Channel.Item {
+		publishedAt := sql.NullTime{}
+		if t, err := time.Parse(time.RFC1123Z, item.PubDate); err == nil {
+			publishedAt = sql.NullTime{
+				Time:  t,
+				Valid: true,
+			}
+		}
+
+		_, err = db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			FeedID:    ffeed.ID,
+			Title:     item.Title,
+			Description: sql.NullString{
+				String: item.Description,
+				Valid:  true,
+			},
+			Url:         item.Link,
+			PublishedAt: publishedAt,
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				continue
+			}
+			log.Printf("Couldn't create post: %v", err)
+			continue
+		}
 	}
 
 	return rss, nil
