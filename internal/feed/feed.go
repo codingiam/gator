@@ -1,12 +1,16 @@
 package feed
 
 import (
+	"codingiam/gator/internal/database"
+	"codingiam/gator/internal/state"
 	"context"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"html"
 	"io"
 	"net/http"
+	"time"
 )
 
 type RSSFeed struct {
@@ -61,4 +65,26 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	fmt.Println(feed)
 
 	return &feed, nil
+}
+
+func ScrapeFeeds(st *state.State) (*RSSFeed, error) {
+	ctx := context.Background()
+
+	ffeed, err := st.Db.GetNextFeedToFetch(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rss, err := FetchFeed(ctx, ffeed.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	err = st.Db.MarkFeedFetched(ctx,
+		database.MarkFeedFetchedParams{ID: ffeed.ID, LastFetchedAt: sql.NullTime{Time: time.Now(), Valid: true}})
+	if err != nil {
+		return rss, err
+	}
+
+	return rss, nil
 }

@@ -3,17 +3,29 @@ package commands
 import (
 	"codingiam/gator/internal/feed"
 	"codingiam/gator/internal/state"
-	"context"
+	"errors"
 	"fmt"
+	"time"
 )
 
-func handlerAgg(st *state.State, _ command) error {
-	feed, err := feed.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+func handlerAgg(st *state.State, cmd command) error {
+	if len(cmd.Args) != 1 {
+		return errors.New("agg requires interval")
+	}
+
+	timeBetweenRequests, err := time.ParseDuration(cmd.Args[0])
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(feed)
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <-ticker.C {
+		ffeed, err := feed.ScrapeFeeds(st)
+		if err != nil {
+			return err
+		}
+		fmt.Println(ffeed)
+	}
 
 	return nil
 }
