@@ -24,6 +24,7 @@ func New() Commands {
 			"feeds":     handlerFeeds,
 			"follow":    middlewareLoggedIn(handlerFollow),
 			"following": middlewareLoggedIn(handlerFollowing),
+			"unfollow":  middlewareLoggedIn(handlerUnfollow),
 		},
 	}
 }
